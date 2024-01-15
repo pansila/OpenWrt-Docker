@@ -71,12 +71,6 @@ jobs:
           sudo -E apt-get -qq install build-essential libncurses5-dev libncursesw5-dev \
             zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python3 qemu-utils
 
-      - name: Set Up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set Up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
       - name: Generate Variables
         id: env
         run: |
@@ -99,6 +93,7 @@ jobs:
         run: |
           tar -xJf *.tar.xz
           cd immortalwrt-imagebuilder-$DEVICE_TARGET-$DEVICE_SUBTARGET.Linux-x86_64
+          ls -a
           cp -f $GITHUB_WORKSPACE/config/repositories.conf .
           sed -i "s/DEVICE_SUBTARGET/$DEVICE_SUBTARGET/g; \
             s/DEVICE_TARGET/$DEVICE_TARGET/g; \
@@ -117,6 +112,7 @@ jobs:
           sed -i "/CONFIG_TARGET_ROOTFS_SQUASHFS/s/.*/# CONFIG_TARGET_ROOTFS_SQUASHFS is not set/;
             /CONFIG_TARGET_ROOTFS_EXT4FS/s/.*/# CONFIG_TARGET_ROOTFS_EXT4FS is not set/" .config
           export CONFIG_MINI_PACKAGES=$(cat $GITHUB_WORKSPACE/config/mini-packages.config | tr -s "\n" " ")
+          ls -a
           make image PACKAGES="$CONFIG_MINI_PACKAGES" FILES="files"
           cp bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET/*rootfs.tar.gz $GITHUB_WORKSPACE
           cd $GITHUB_WORKSPACE
